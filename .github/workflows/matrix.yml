@@ -1,0 +1,41 @@
+name: Multi-Platform Matrix Build with Artifacts
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        python-version: ['3.9', '3.10', '3.11']
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: matrix-da63648
+        run: echo "Building for Python version ${{ matrix.python-version }}"
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Generate build artifact
+        run: |
+          OUT="build_output_${{ matrix.python-version }}.txt"
+          echo "Matrix build output for Python ${{ matrix.python-version }}" > "$OUT"
+          echo "Timestamp: $(date --utc)" >> "$OUT"
+          echo "Python version check:" >> "$OUT"
+          python --version >> "$OUT"
+          echo "Non-empty line" >> "$OUT"
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-da63648-py${{ matrix.python-version }}
+          path: build_output_${{ matrix.python-version }}.txt
